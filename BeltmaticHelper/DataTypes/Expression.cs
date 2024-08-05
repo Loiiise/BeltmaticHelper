@@ -7,7 +7,7 @@ public abstract record Expression
 
 public sealed record Number : Expression
 {
-    int Value { get; init; }
+    public int Value { get; init; }
 
     public override int Result() => Value;
 
@@ -16,19 +16,24 @@ public sealed record Number : Expression
 
 public sealed record Operation : Expression
 {
-    Operator Operator { get; init; }
-    Expression A { get; init; }
-    Expression B { get; init; }
-    
-    public override int Result() => Operator switch
+    public Operator Operator { get; init; }
+    public Expression A { get; init; }
+    public Expression B { get; init; }
+
+    public override int Result()
     {
-        Operator.Adder => A.Result() + B.Result(),
-        Operator.Multiplier => A.Result() * B.Result(),
-        Operator.Subtractor => A.Result() - B.Result(),
-        Operator.Divider => A.Result() / B.Result(),
-        Operator.Exponentiator => (int)Math.Pow(A.Result(), B.Result()),
-        _ => throw new NotSupportedException(),
-    };
+        _result = _result ?? Operator switch
+        {
+            Operator.Adder => A.Result() + B.Result(),
+            Operator.Multiplier => A.Result() * B.Result(),
+            Operator.Subtractor => A.Result() - B.Result(),
+            Operator.Divider => A.Result() / B.Result(),
+            Operator.Exponentiator => (int)Math.Pow(A.Result(), B.Result()),
+            _ => throw new NotSupportedException(),
+        };
+
+        return (int)_result;
+    }
 
     public override string ToString() => $"({A.ToString()} {Operator.ToString()} {B.ToString()})";
 
@@ -41,4 +46,6 @@ public sealed record Operation : Expression
         Operator.Exponentiator => "^",
         _ => throw new NotSupportedException(),
     };
+
+    private int? _result;
 }
