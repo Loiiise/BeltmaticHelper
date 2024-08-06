@@ -1,105 +1,100 @@
 ﻿using BeltmaticHelper.DataTypes;
-using System.Diagnostics;
 
 namespace BeltmaticHelper;
 public class ExpressionBuilder
 {
-    public Expression Find(int numberToFind, int[] availableNumbers, Operator[] availableOperators)
+    public ExpressionBuilder(int[] availableNumbers, Operator[] availableOperators)
     {
         _availableOperators = availableOperators;
-        for (int i = 0; i < availableNumbers.Length; ++i)
-        {
-            var newNumber = new Number
+
+        var availableNumbersExpressions = availableNumbers
+            .Select(n => new Number
             {
-                Value = availableNumbers[i],
+                Value = n,
+            });
 
-            };
-            _expressionQueue.Enqueue(newNumber, 0);
-            _seenNumbers[availableNumbers[i]] = true;
-            _availableExpressions.Add(newNumber);
+        _expressionPerAmountOfOperators.Add(availableNumbersExpressions.ToArray());
+
+        foreach (var availableNumber in availableNumbersExpressions)
+        {
+            _knownSolutions[availableNumber.Value] = availableNumber;
         }
+    }
 
-
-        /*
-        int previousAmountOfSteps = 0;
-
+    public Expression Find(int numberToFind)
+    {
         while (true)
         {
-            var item = _expressionQueue.Dequeue();
-
-            if (item.Result() == numberToFind)
+            if (_knownSolutions[numberToFind] != null)
             {
-                return item;
+                return _knownSolutions[numberToFind];
             }
 
-            var nextSteps = GenerateSuccessors(item).ToArray();
-            
-            Debug.Assert(item.AmountOfOperators == previousAmountOfSteps ||
-                item.AmountOfOperators == previousAmountOfSteps + 1);
+            var amountOfOperatorsLayerToAdd = _expressionPerAmountOfOperators.Count();
+            var nextLayerExpressions = new List<Expression>();
 
-            foreach (var nextStep in nextSteps)
-            {
+            foreach (var (indexA, indexB) in FindIndexCombinations(amountOfOperatorsLayerToAdd))
+                foreach (var operatorToApply in _availableOperators)
+                    foreach (var a in _expressionPerAmountOfOperators[indexA])
+                        foreach (var b in _expressionPerAmountOfOperators[indexB])
+                        {
+                            AddIfNew(new Operation
+                            {
+                                Operator = operatorToApply,
+                                A = a,
+                                B = b,
+                            }, nextLayerExpressions);
 
-                //Debug.Assert(nextStep.AmountOfOperators <= item.AmountOfOperators * 2 + 1 || item.AmountOfOperators == 0);
-
-                var stepResult = nextStep.Result();
-
-                if (stepResult < 1 || _seenNumbers[stepResult])
-                {
-                    continue;
-                }
-                _seenNumbers[stepResult] = true;
-
-                _availableExpressions.Add(nextStep);
-                _expressionQueue.Enqueue(nextStep, nextStep.AmountOfOperators);
-            }
-
-            previousAmountOfSteps = item.AmountOfOperators;
+                            if (!IsSymmetrical(operatorToApply))
+                            {
+                                AddIfNew(new Operation
+                                {
+                                    Operator = operatorToApply,
+                                    A = b,
+                                    B = a,
+                                }, nextLayerExpressions);
+                            }
+                        }
+            _expressionPerAmountOfOperators.Add(nextLayerExpressions.ToArray());
         }
-        */
     }
 
-
-
-
-    private IEnumerable<Expression> GenerateSuccessors(Expression expression)
+    private IEnumerable<(int, int)> FindIndexCombinations(int amountOfOperatorsLayerToAdd)
     {
-        foreach (var otherExpression in _availableExpressions)
+        for (int  i = 0; i < amountOfOperatorsLayerToAdd; i++)
         {
-            foreach (var operatorToApply in _availableOperators)
+            for (int j = i; j < amountOfOperatorsLayerToAdd; j++)
             {
-                yield return new Operation
+                if (i + j + 1 == amountOfOperatorsLayerToAdd)
                 {
-                    Operator = operatorToApply,
-                    A = expression,
-                    B = otherExpression,
-                };
-
-                if (!IsSymmetrical(operatorToApply))
-                {
-                    yield return new Operation
-                    {
-                        Operator = operatorToApply,
-                        A = otherExpression,
-                        B = expression,
-                    };
-
+                    yield return (i, j);
                 }
             }
         }
     }
 
+    private void AddIfNew(Expression expression, List<Expression> list)
+    {
+        if (expression.Result() >= 0 &&
+            expression.Result() <+ _highestNumber && 
+            _knownSolutions[expression.Result()] == null)
+        {
+            _knownSolutions[expression.Result()] = expression;
+            list.Add(expression);
+        }
+    }
 
     private bool IsSymmetrical(Operator Operator) => Operator is Operator.Adder or Operator.Multiplier;
 
-    private bool[] _seenNumbers = new bool[int.MaxValue / 2];
-    private List<Expression> _availableExpressions = new();
-    private ExpressionQueue _expressionQueue = new();
-    private Operator[] _availableOperators;
+    private const int _highestNumber = 10_000_000;
+
+    private readonly Operator[] _availableOperators;
+    private List<Expression[]> _expressionPerAmountOfOperators = new();
+    private Expression[] _knownSolutions = new Expression[_highestNumber + 1];
 }
 
 public class ExpressionQueue : PriorityQueue<Expression, int>
 {
-    public ExpressionQueue() : base(Comparer<int>.Create((x, y) => x - y)) 
+    public ExpressionQueue() : base(Comparer<int>.Create((x, y) => x - y))
     { }
 }
