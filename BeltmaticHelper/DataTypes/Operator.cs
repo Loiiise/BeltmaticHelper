@@ -7,5 +7,5 @@ public enum Operator : byte
     Multiplier = 1 << 1,
     Subtractor = 1 << 2,
     Divider = 1 << 3,
-    Exponentiaro = 1 << 4,
+    Exponentiator = 1 << 4,
 }

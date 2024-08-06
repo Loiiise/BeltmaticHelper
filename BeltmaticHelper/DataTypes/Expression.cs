@@ -1,13 +1,15 @@
 ﻿namespace BeltmaticHelper.DataTypes;
 
-public abstract record Expression 
+public abstract record Expression
 {
     public abstract int Result();
+    public abstract int AmountOfOperators { get; }
 }
 
 public sealed record Number : Expression
 {
     public int Value { get; init; }
+    public override int AmountOfOperators => 0;
 
     public override int Result() => Value;
 
@@ -16,6 +18,7 @@ public sealed record Number : Expression
 
 public sealed record Operation : Expression
 {
+    public override int AmountOfOperators => A.AmountOfOperators + B.AmountOfOperators + 1;
     public Operator Operator { get; init; }
     public Expression A { get; init; }
     public Expression B { get; init; }
@@ -35,7 +38,7 @@ public sealed record Operation : Expression
         return (int)_result;
     }
 
-    public override string ToString() => $"({A.ToString()} {Operator.ToString()} {B.ToString()})";
+    public override string ToString() => $"({A.ToString()} {OperatorAsString(Operator)} {B.ToString()})";
 
     private string OperatorAsString(Operator operatorToStringify) => operatorToStringify switch
     {
