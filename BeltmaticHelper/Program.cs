@@ -9,8 +9,8 @@ internal class Program
         Console.WriteLine("Hello, World!");
 
         var expressionBuilder = new ExpressionBuilder(
-            new int[] { 1, 2, 3, 4, 5, 6, 8, 7, 9, 11, 12 },
-            new Operator[] { Operator.Adder, Operator.Multiplier, Operator.Subtractor, Operator.Divider });
+            new int[] { 1, 2, 3, 4, 5, 6, 8, 7, 9, 11, 12, 13 },
+            new Operator[] { Operator.Adder, Operator.Multiplier, Operator.Subtractor, Operator.Divider, Operator.Exponentiator });
 
         while (true)
         {

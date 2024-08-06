@@ -55,6 +55,7 @@ public class ExpressionBuilder
                                 }, nextLayerExpressions);
                             }
                         }
+             
             _expressionPerAmountOfOperators.Add(nextLayerExpressions.ToArray());
         }
     }
@@ -75,7 +76,7 @@ public class ExpressionBuilder
 
     private void AddIfNew(Expression expression, List<Expression> list)
     {
-        if (expression.Result() >= 0 &&
+        if (expression.Result() > 0 &&
             expression.Result() <+ _highestNumber && 
             _knownSolutions[expression.Result()] == null)
         {
