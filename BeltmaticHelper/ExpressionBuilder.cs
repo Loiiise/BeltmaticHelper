@@ -1,4 +1,4 @@
-﻿using BeltmaticHelper.DataTypes;
+using BeltmaticHelper.DataTypes;
 
 namespace BeltmaticHelper;
 public class ExpressionBuilder
@@ -18,6 +18,14 @@ public class ExpressionBuilder
         foreach (var availableNumber in availableNumbersExpressions)
         {
             _knownSolutions[availableNumber.Value] = availableNumber;
+        }
+    }
+
+    public void FindAll()
+    {
+        for (int i = 1; i < _knownSolutions.Length; ++i)
+        {
+            Find(i);
         }
     }
 
