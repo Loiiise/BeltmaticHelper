@@ -1,43 +1,24 @@
 using BeltmaticHelper.DataTypes;
 
 namespace BeltmaticHelper;
+
 public class ExpressionBuilder
 {
-    public ExpressionBuilder(int[] availableNumbers, Operator[] availableOperators)
+    public ExpressionBuilder(Number[] availableNumbers, Operator[] availableOperators)
     {
         _availableOperators = availableOperators;
+        _expressionPerAmountOfOperators.Add(availableNumbers);
 
-        var availableNumbersExpressions = availableNumbers
-            .Select(n => new Number
-            {
-                Value = n,
-            });
-
-        _expressionPerAmountOfOperators.Add(availableNumbersExpressions.ToArray());
-
-        foreach (var availableNumber in availableNumbersExpressions)
+        foreach (var availableNumber in availableNumbers)
         {
             _knownSolutions[availableNumber.Value] = availableNumber;
         }
     }
 
-    public void FindAll()
-    {
-        for (int i = 1; i < _knownSolutions.Length; ++i)
-        {
-            Find(i);
-        }
-    }
-
     public Expression Find(int numberToFind)
     {
-        while (true)
+        while (_knownSolutions[numberToFind] == null)
         {
-            if (_knownSolutions[numberToFind] != null)
-            {
-                return _knownSolutions[numberToFind];
-            }
-
             var amountOfOperatorsLayerToAdd = _expressionPerAmountOfOperators.Count();
             var nextLayerExpressions = new List<Expression>();
 
@@ -53,7 +34,7 @@ public class ExpressionBuilder
                                 B = b,
                             }, nextLayerExpressions);
 
-                            if (!IsSymmetrical(operatorToApply))
+                            if (!operatorToApply.IsSymmetrical())
                             {
                                 AddIfNew(new Operation
                                 {
@@ -63,14 +44,16 @@ public class ExpressionBuilder
                                 }, nextLayerExpressions);
                             }
                         }
-             
+
             _expressionPerAmountOfOperators.Add(nextLayerExpressions.ToArray());
         }
+
+        return _knownSolutions[numberToFind];
     }
 
     private IEnumerable<(int, int)> FindIndexCombinations(int amountOfOperatorsLayerToAdd)
     {
-        for (int  i = 0; i < amountOfOperatorsLayerToAdd; i++)
+        for (int i = 0; i < amountOfOperatorsLayerToAdd; i++)
         {
             for (int j = i; j < amountOfOperatorsLayerToAdd; j++)
             {
@@ -85,7 +68,7 @@ public class ExpressionBuilder
     private void AddIfNew(Expression expression, List<Expression> list)
     {
         if (expression.Result() > 0 &&
-            expression.Result() <+ _highestNumber && 
+            expression.Result() <= _highestNumber &&
             _knownSolutions[expression.Result()] == null)
         {
             _knownSolutions[expression.Result()] = expression;
@@ -93,17 +76,10 @@ public class ExpressionBuilder
         }
     }
 
-    private bool IsSymmetrical(Operator Operator) => Operator is Operator.Adder or Operator.Multiplier;
-
+    // todo #7: this number could be dynamic 
     private const int _highestNumber = 10_000_000;
 
     private readonly Operator[] _availableOperators;
     private List<Expression[]> _expressionPerAmountOfOperators = new();
     private Expression[] _knownSolutions = new Expression[_highestNumber + 1];
-}
-
-public class ExpressionQueue : PriorityQueue<Expression, int>
-{
-    public ExpressionQueue() : base(Comparer<int>.Create((x, y) => x - y))
-    { }
 }

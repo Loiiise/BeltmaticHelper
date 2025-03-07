@@ -18,4 +18,6 @@ internal static class GameKnowledgeMagicValues
         Operator.Exponentiator => new[] { Operator.Adder, Operator.Multiplier, Operator.Subtractor, Operator.Divider, Operator.Exponentiator },
         _ => throw new NotImplementedException(),
     };
+
+    internal static bool IsSymmetrical(this Operator @operator) => @operator is Operator.Adder or Operator.Multiplier;
 }
