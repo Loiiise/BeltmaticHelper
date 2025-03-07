@@ -6,22 +6,26 @@ internal class Program
 {
     static void Main(string[] args)
     {
-        Console.WriteLine("Hello, World!");
-
         var expressionBuilder = new ExpressionBuilder(
-            new int[] { 1, 2, 3, 4, 5, 6, 8, 7, 9, 11, 12, 13 },
-            new Operator[] { Operator.Adder, Operator.Multiplier, Operator.Subtractor, Operator.Divider, Operator.Exponentiator });
+            GameKnowledgeMagicValues.GetNumberExpressionsUpToAndIncluding(13).ToArray(),
+            GameKnowledgeMagicValues.GetOperatorsUpToAndIncluding(Operator.Exponentiator).ToArray());
 
         while (true)
         {
-            while (int.TryParse(Console.ReadLine(), out var numberToFind))
+            Console.WriteLine("What number would you like to find an expression for?");
+            if (int.TryParse(Console.ReadLine(), out var numberToFind))
             {
+                Console.WriteLine($"Finding an expression for {numberToFind}...");
+
                 var result = expressionBuilder.Find(numberToFind);
 
                 Console.WriteLine(result.ToString());
-
+                Console.WriteLine("Good luck building the factory!");
             }
-            Console.WriteLine("That's not a number silly :)");
+            else
+            {
+                Console.WriteLine("That's not a number silly :)");
+            }
         }
     }
 }
