@@ -10,15 +10,13 @@ public sealed record Number : Expression
     public int Value { get; init; }
 
     public override int Result() => Value;
-
-    public override string ToString() => Value.ToString();
 }
 
 public sealed record Operation : Expression
 {
-    public Operator Operator { get; init; }
-    public Expression A { get; init; }
-    public Expression B { get; init; }
+    public required Operator Operator { get; init; }
+    public required Expression A { get; init; }
+    public required Expression B { get; init; }
 
     public override int Result()
     {
@@ -35,17 +33,7 @@ public sealed record Operation : Expression
         return (int)_result;
     }
 
-    public override string ToString() => $"({A.ToString()} {OperatorAsString(Operator)} {B.ToString()})";
-
-    private string OperatorAsString(Operator operatorToStringify) => operatorToStringify switch
-    {
-        Operator.Adder => "+",
-        Operator.Multiplier => "*",
-        Operator.Subtractor => "-",
-        Operator.Divider => "/",
-        Operator.Exponentiator => "^",
-        _ => throw new NotSupportedException(),
-    };
+    public override string ToString() => $"({A.ToString()} {Operator.ToDisplayString()} {B.ToString()})";
 
     private int? _result;
 }
