@@ -20,4 +20,14 @@ internal static class GameKnowledgeMagicValues
     };
 
     internal static bool IsSymmetrical(this Operator @operator) => @operator is Operator.Adder or Operator.Multiplier;
+    
+    internal static string ToDisplayString(this Operator @operator) => @operator switch
+    {
+        Operator.Adder => "+",
+        Operator.Multiplier => "*",
+        Operator.Subtractor => "-",
+        Operator.Divider => "/",
+        Operator.Exponentiator => "^",
+        _ => throw new NotImplementedException(),
+    };
 }
