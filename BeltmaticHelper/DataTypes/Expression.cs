@@ -10,6 +10,8 @@ public sealed record Number : Expression
     public int Value { get; init; }
 
     public override int Result() => Value;
+
+    public override string ToString() => Value.ToString();
 }
 
 public sealed record Operation : Expression
